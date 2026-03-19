@@ -1,0 +1,73 @@
+spring:
+  application:
+    name: firstpay-sample-springboot
+
+  thymeleaf:
+    cache: false
+    encoding: UTF-8
+    mode: HTML
+    prefix: classpath:/templates/
+    suffix: .html
+
+  output:
+    ansi:
+      enabled: always
+
+server:
+  port: 8080
+  servlet:
+    context-path: /
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+firstpay:
+  mx-id: testcorp
+  pass-key: 6aMoJujE34XnL9gvUqdKGMqs9GzYaNo6
+  env: develop
+  dev-url: https://dev.firstpay.co.kr
+  prod-url: https://pay.firstpay.co.kr
+  sdk-js-url: /js/firstpay_v2.js
+  open-type: popup
+  lang: ko
+
+logging:
+  level:
+    root: INFO
+    kr.co.kpn.firstpay: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+firstpay:
+  env: develop
+  mx-id: testcorp
+
+logging:
+  level:
+    kr.co.kpn.firstpay: DEBUG
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+  thymeleaf:
+    cache: true
+
+firstpay:
+  env: product
+  mx-id: your_production_merchant_id
+  pass-key: ${FIRSTPAY_PASS_KEY:your_production_pass_key}
+
+logging:
+  level:
+    root: WARN
+    kr.co.kpn.firstpay: INFO

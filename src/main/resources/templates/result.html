@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>결제 결과 (Spring Boot)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Malgun Gothic', '맑은 고딕', Arial, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+
+        .result-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .result-icon {
+            font-size: 60px;
+            margin-bottom: 15px;
+        }
+
+        .result-icon.success {
+            color: #28a745;
+        }
+
+        .result-icon.fail {
+            color: #dc3545;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .result-message {
+            font-size: 16px;
+            color: #666;
+        }
+
+        .info-section {
+            margin-bottom: 20px;
+        }
+
+        .info-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+        }
+
+        .info-title.success {
+            border-bottom: 2px solid #28a745;
+        }
+
+        .info-title.fail {
+            border-bottom: 2px solid #dc3545;
+        }
+
+        .info-row {
+            display: flex;
+            margin-bottom: 10px;
+            padding: 8px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+
+        .info-label {
+            flex: 0 0 150px;
+            font-weight: bold;
+            color: #666;
+        }
+
+        .info-value {
+            flex: 1;
+            color: #333;
+            word-break: break-all;
+        }
+
+        .button-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 0 5px;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+
+        .json-view {
+            background-color: #f4f4f4;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .note {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e7f3ff;
+            border-left: 4px solid #007bff;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #004085;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            background-color: #28a745;
+            color: white;
+            border-radius: 3px;
+            font-size: 12px;
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="result-header">
+            <div class="result-icon" th:classappend="${isSuccess} ? 'success' : 'fail'">
+                <span th:text="${isSuccess} ? '✓' : '✗'"></span>
+            </div>
+            <h1 th:text="${isSuccess} ? '결제 완료' : '결제 실패'"></h1>
+            <div class="result-message" th:text="${resultMessage}"></div>
+        </div>
+
+        <div class="info-section">
+            <div class="info-title" th:classappend="${isSuccess} ? 'success' : 'fail'">결제 정보</div>
+            <div class="info-row">
+                <div class="info-label">가맹점 ID</div>
+                <div class="info-value" th:text="${mxId}"></div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">주문번호</div>
+                <div class="info-value" th:text="${mxIssueNo}"></div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">주문일시</div>
+                <div class="info-value" th:text="${mxIssueDate}"></div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">결제금액</div>
+                <div class="info-value" th:text="${#numbers.formatInteger(amount, 1, 'COMMA')} + ' 원'"></div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">응답 코드</div>
+                <div class="info-value" th:text="${code}"></div>
+            </div>
+            <div class="info-row" th:if="${fdTid != null and !fdTid.isEmpty()}">
+                <div class="info-label">KPN 인증 거래번호</div>
+                <div class="info-value" th:text="${fdTid}"></div>
+            </div>
+            <div class="info-row" th:if="${!isSuccess and message != null and !message.isEmpty()}">
+                <div class="info-label">오류 메시지</div>
+                <div class="info-value" th:text="${message}"></div>
+            </div>
+        </div>
+
+        <div class="info-section" th:if="${isSuccess and tid != null}">
+            <div class="info-title success">승인 결과 정보</div>
+            <div class="info-row">
+                <div class="info-label">거래 ID</div>
+                <div class="info-value" th:text="${tid}"></div>
+            </div>
+            <div class="info-row" th:if="${payMethod != null}">
+                <div class="info-label">결제수단</div>
+                <div class="info-value" th:text="${payMethod}"></div>
+            </div>
+            <div class="info-row" th:if="${authDate != null}">
+                <div class="info-label">거래시간</div>
+                <div class="info-value" th:text="${authDate}"></div>
+            </div>
+            <div class="info-row" th:if="${authNo != null and !authNo.isEmpty()}">
+                <div class="info-label">승인번호</div>
+                <div class="info-value" th:text="${authNo}"></div>
+            </div>
+            <div class="info-row" th:if="${issName != null and !issName.isEmpty()}">
+                <div class="info-label">발급사</div>
+                <div class="info-value" th:text="${issName}"></div>
+            </div>
+            <div class="info-row" th:if="${vactNo != null and !vactNo.isEmpty()}">
+                <div class="info-label">가상계좌번호</div>
+                <div class="info-value" th:text="${vactNo}"></div>
+            </div>
+            <div class="info-row" th:if="${bankName != null and !bankName.isEmpty()}">
+                <div class="info-label">은행명</div>
+                <div class="info-value" th:text="${bankName}"></div>
+            </div>
+            <div class="info-row" th:if="${expireDate != null and !expireDate.isEmpty()}">
+                <div class="info-label">입금만료일시</div>
+                <div class="info-value" th:text="${expireDate}"></div>
+            </div>
+        </div>
+
+        <div class="info-section" th:if="${approvalData != null}">
+            <div class="info-title" th:classappend="${isSuccess} ? 'success' : 'fail'">전체 응답 데이터 (JSON)</div>
+            <div class="json-view" th:text="${approvalData}"></div>
+        </div>
+
+        <div class="note">
+            <strong>Spring Boot 결제 처리<span class="badge">MVC</span></strong>
+            이 페이지는 Spring Boot Controller에서 승인 처리 후 Thymeleaf로 렌더링된 결과입니다.<br>
+            실제 운영 환경에서는 DB 저장, 로깅, 알림 발송 등의 추가 처리를 구현하세요.
+        </div>
+
+        <div class="button-container">
+            <a href="/payment" class="btn btn-primary">다시 결제하기</a>
+            <!-- 결제 성공이고 아직 취소되지 않은 경우에만 취소 버튼 표시 -->
+            <button
+                th:if="${isSuccess and tid != null and !(isCanceled ?: false)}"
+                id="cancelBtn"
+                class="btn btn-danger"
+                onclick="confirmCancel()">
+                결제 취소하기
+            </button>
+        </div>
+    </div>
+
+    <form id="cancelForm" action="/payment/cancel" method="post" style="display: none;">
+        <input type="hidden" name="payMethod" th:value="${payMethod}">
+        <input type="hidden" name="mxId" th:value="${mxId}">
+        <input type="hidden" name="mxIssueNo" th:value="${mxIssueNo}">
+        <input type="hidden" name="mxIssueDate" th:value="${mxIssueDate}">
+        <input type="hidden" name="amount" th:value="${amount}">
+        <input type="hidden" name="tid" th:value="${tid}">
+    </form>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        function confirmCancel() {
+            if (confirm('결제를 취소하시겠습니까?\n')) {
+                document.getElementById('cancelBtn').disabled = true;
+                document.getElementById('cancelBtn').textContent = '취소 처리 중...';
+
+                document.getElementById('cancelForm').submit();
+            }
+        }
+        /*]]>*/
+    </script>
+</body>
+</html>
