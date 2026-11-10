@@ -67,12 +67,12 @@ public class PaymentService {
     }
 
     public JSONObject requestApproval(String approvalUrl, String mxId, String mxIssueNo, String fdTid) {
+        // KPN 결제 서버 주소가 아니면 호출하지 않는다 (callHash 유출·SSRF 방지)
+        if (!ApprovalUrlPolicy.isAllowed(approvalUrl)) {
+            throw new IllegalArgumentException("허용되지 않은 approvalUrl 입니다.");
+        }
         try {
-            logger.info("=== 결제 승인 요청 ===");
-            logger.info("approvalUrl: {}", approvalUrl);
-            logger.info("mxId: {}", mxId);
-            logger.info("mxIssueNo: {}", mxIssueNo);
-            logger.info("fdTid: {}", fdTid);
+            logger.info("=== 결제 승인 요청 === mxIssueNo: {}, fdTid: {}, approvalUrl: {}", mxIssueNo, fdTid, approvalUrl);
 
             // 승인용 callHash 생성
             String callHash = generateCallHashForApproval(mxId, mxIssueNo);
@@ -83,8 +83,7 @@ public class PaymentService {
             requestData.put("mxIssueNo", mxIssueNo);
             requestData.put("fdTid", fdTid);
             requestData.put("callHash", callHash);
-
-            logger.info("요청 데이터: {}", requestData.toString(2));
+            // 요청 전문은 callHash 가 들어 있어 로그에 남기지 않습니다
 
             // HTTP 헤더 설정
             HttpHeaders headers = new HttpHeaders();
@@ -100,8 +99,9 @@ public class PaymentService {
                     String.class
             );
 
-            logger.info("응답 코드: {}", response.getStatusCodeValue());
-            logger.info("응답 데이터: {}", response.getBody());
+            logger.info("승인 응답 코드: {}", response.getStatusCodeValue());
+            // 응답 전문에는 카드·고객 정보가 들어 있을 수 있어 DEBUG 로만 남깁니다
+            logger.debug("승인 응답 데이터: {}", response.getBody());
 
             // 응답 파싱
             JSONObject responseJson = new JSONObject(response.getBody());
@@ -152,13 +152,7 @@ public class PaymentService {
 
     public JSONObject requestCancel(String payMethod, String mxId, String mxIssueNo, String mxIssueDate, long amount, String tid) {
         try {
-            logger.info("=== 결제 취소 요청 ===");
-            logger.info("payMethod: {}", payMethod);
-            logger.info("mxId: {}", mxId);
-            logger.info("mxIssueNo: {}", mxIssueNo);
-            logger.info("mxIssueDate: {}", mxIssueDate);
-            logger.info("amount: {}", amount);
-            logger.info("tid: {}", tid);
+            logger.info("=== 결제 취소 요청 === mxIssueNo: {}, tid: {}, amount: {}", mxIssueNo, tid, amount);
 
             // 취소용 callHash 생성
             String callHash = generateCallHashForCancel(mxId, mxIssueNo, amount);
@@ -179,7 +173,7 @@ public class PaymentService {
                 requestData.put("tid", tid);
             }
 
-            logger.info("요청 데이터: {}", requestData.toString(2));
+            // 요청 전문은 callHash 가 들어 있어 로그에 남기지 않습니다
 
             // HTTP 헤더 설정
             HttpHeaders headers = new HttpHeaders();
@@ -195,8 +189,9 @@ public class PaymentService {
                     String.class
             );
 
-            logger.info("응답 코드: {}", response.getStatusCodeValue());
-            logger.info("응답 데이터: {}", response.getBody());
+            logger.info("취소 응답 코드: {}", response.getStatusCodeValue());
+            // 응답 전문에는 카드·고객 정보가 들어 있을 수 있어 DEBUG 로만 남깁니다
+            logger.debug("취소 응답 데이터: {}", response.getBody());
 
             // 응답 파싱
             JSONObject responseJson = new JSONObject(response.getBody());
