@@ -1,5 +1,6 @@
 package kr.co.kpn.firstpay.sample.config;
 
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -9,7 +10,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @ConfigurationProperties(prefix = "firstpay")
-public class PaymentProperties {
+public class PaymentProperties implements InitializingBean {
 
     /**
      * 가맹점 ID
@@ -17,9 +18,11 @@ public class PaymentProperties {
     private String mxId = "testcorp";
 
     /**
-     * 패스키 (보안상 환경변수 또는 외부 설정으로 관리 권장)
+     * 패스키
+     * 코드·설정 파일에 직접 쓰지 말고 환경변수 FIRSTPAY_PASS_KEY 로 넘기세요 (application.yml 참고).
+     * 값이 없으면 애플리케이션이 시작되지 않습니다.
      */
-    private String passKey = "6aMoJujE34XnL9gvUqdKGMqs9GzYaNo6";
+    private String passKey;
 
     /**
      * 환경 설정 (develop: 개발계, product: 운영계)
@@ -115,6 +118,16 @@ public class PaymentProperties {
 
     public void setLang(String lang) {
         this.lang = lang;
+    }
+
+    /**
+     * passKey 가 없으면 시작을 멈춥니다.
+     */
+    @Override
+    public void afterPropertiesSet() {
+        if (passKey == null || passKey.trim().isEmpty()) {
+            throw new IllegalStateException("firstpay.pass-key 가 없습니다. 환경변수 FIRSTPAY_PASS_KEY 에 발급받은 passKey 를 설정하세요.");
+        }
     }
 
     /**

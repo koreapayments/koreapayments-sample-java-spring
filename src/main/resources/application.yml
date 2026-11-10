@@ -24,7 +24,7 @@ server:
 
 firstpay:
   mx-id: testcorp
-  pass-key: 6aMoJujE34XnL9gvUqdKGMqs9GzYaNo6
+  pass-key: ${FIRSTPAY_PASS_KEY:}   # 환경변수로만 설정 (코드·파일에 직접 쓰지 않음). 없으면 시작 실패
   env: develop
   dev-url: https://dev.firstpay.co.kr
   prod-url: https://pay.firstpay.co.kr
@@ -35,7 +35,7 @@ firstpay:
 logging:
   level:
     root: INFO
-    kr.co.kpn.firstpay: DEBUG
+    kr.co.kpn.firstpay: DEBUG   # 응답 전문은 DEBUG 로만 출력. 운영(prod)은 INFO
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
     file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
@@ -65,7 +65,7 @@ spring:
 firstpay:
   env: product
   mx-id: your_production_merchant_id
-  pass-key: ${FIRSTPAY_PASS_KEY:your_production_pass_key}
+  pass-key: ${FIRSTPAY_PASS_KEY:}   # 환경변수로만 설정 (코드·파일에 직접 쓰지 않음). 없으면 시작 실패
 
 logging:
   level:

@@ -1,2 +1,4 @@
-.idea
-sample-springboot-project.iml
+.idea/
+*.iml
+target/
+.env

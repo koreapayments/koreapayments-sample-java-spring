@@ -267,12 +267,8 @@
     </div>
 
     <form id="cancelForm" action="/payment/cancel" method="post" style="display: none;">
-        <input type="hidden" name="payMethod" th:value="${payMethod}">
-        <input type="hidden" name="mxId" th:value="${mxId}">
+        <!-- 주문번호만 보냅니다. 금액·거래번호는 서버에 저장된 원거래 값을 사용합니다 -->
         <input type="hidden" name="mxIssueNo" th:value="${mxIssueNo}">
-        <input type="hidden" name="mxIssueDate" th:value="${mxIssueDate}">
-        <input type="hidden" name="amount" th:value="${amount}">
-        <input type="hidden" name="tid" th:value="${tid}">
     </form>
 
     <script th:inline="javascript">
